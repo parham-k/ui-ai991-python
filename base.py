@@ -28,6 +28,7 @@ class AgentData:
     position: tuple
     carrying: int or None
     collected: list
+    score: int
 
 
 @dataclasses.dataclass
@@ -40,6 +41,14 @@ class TurnData:
 class BaseAgent(metaclass=abc.ABCMeta):
 
     def __init__(self):
+        self.connection = None
+        self.name = None
+        self.agent_count = None
+        self.grid_size = None
+        self.max_turns = None
+        self.decision_time_limit = None
+
+    def connect(self):
         self.connection = socket.socket()
         self.connection.connect(('127.0.0.1', 9921))
         self.name = read_utf(self.connection)
@@ -64,13 +73,16 @@ class BaseAgent(metaclass=abc.ABCMeta):
                 collected = list(map(int, list(info[3])))
             else:
                 collected = []
-            agents.append(AgentData(name, position, carrying, collected))
+            score = int(info[4])
+            agents.append(AgentData(name, position, carrying, collected, score))
         map_data = []
         for _ in range(self.grid_size):
             map_data.append(list(read_utf(self.connection)))
         return TurnData(turns_left, agents, map_data)
 
     def play(self) -> str:
+        if self.connection is None:
+            self.connect()
         while True:
             first_line = read_utf(self.connection)
             if first_line.startswith('WINNER'):
