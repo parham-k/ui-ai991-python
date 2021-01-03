@@ -18,6 +18,7 @@ class Agent(BaseAgent):
             print(f"CARRYING: {agent.carrying}")
             print(f"COLLECTED: {agent.collected}")
             print(f"SCORE: {agent.score}")
+            print(f"REQUIRED: {agent.count_required}")
         for row in turn_data.map:
             print(''.join(row))
         action_name = input("> ").upper()

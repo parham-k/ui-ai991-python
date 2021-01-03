@@ -29,12 +29,13 @@ class AgentData:
     carrying: int or None
     collected: list
     score: int
+    count_required: list[int]
 
 
 @dataclasses.dataclass
 class TurnData:
     turns_left: int
-    agent_data: list
+    agent_data: list[AgentData]
     map: list
 
 
@@ -47,7 +48,6 @@ class BaseAgent(metaclass=abc.ABCMeta):
         self.grid_size = None
         self.max_turns = None
         self.decision_time_limit = None
-        self.count_required = [0] * 5
 
     def connect(self):
         self.connection = socket.socket()
@@ -61,7 +61,6 @@ class BaseAgent(metaclass=abc.ABCMeta):
             self.decision_time_limit = float('inf')
         else:
             self.decision_time_limit = float(decision_time_limit_str)
-        self.count_required = list(map(int, read_utf(self.connection).split()))
 
     def _read_turn_data(self, first_line: str) -> TurnData:
         turns_left = int(first_line)
@@ -76,7 +75,9 @@ class BaseAgent(metaclass=abc.ABCMeta):
             else:
                 collected = []
             score = int(info[4])
-            agents.append(AgentData(name, position, carrying, collected, score))
+            reqs = list(map(int, info[5].split(',')))
+            data = AgentData(name, position, carrying, collected, score, reqs)
+            agents.append(data)
         map_data = []
         for _ in range(self.grid_size):
             map_data.append(list(read_utf(self.connection)))
