@@ -47,6 +47,7 @@ class BaseAgent(metaclass=abc.ABCMeta):
         self.grid_size = None
         self.max_turns = None
         self.decision_time_limit = None
+        self.count_required = [0] * 5
 
     def connect(self):
         self.connection = socket.socket()
@@ -60,6 +61,7 @@ class BaseAgent(metaclass=abc.ABCMeta):
             self.decision_time_limit = float('inf')
         else:
             self.decision_time_limit = float(decision_time_limit_str)
+        self.count_required = list(map(int, read_utf(self.connection).split()))
 
     def _read_turn_data(self, first_line: str) -> TurnData:
         turns_left = int(first_line)
